@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="http://xiaoyuanfeixia.com/html_lib/css/mescroll.min.css"/>
+		<link rel="stylesheet" type="text/css" href="/src/css/weui.min.css"/>
+		<link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css"/>
+		<link rel="stylesheet" type="text/css" href="http://xiaoyuanfeixia.com/html_lib/css/swiper.min.css">
+		<link rel="stylesheet" type="text/css" href="http://xiaoyuanfeixia.com/html_lib/css/mescroll-option.css"/>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+				-webkit-touch-callout:none;
+				-webkit-tap-highlight-color:transparent;
+			}
+			*:not(input,textarea) { 
+			    -webkit-touch-callout: none; 
+			    -webkit-user-select: none; 
+			}
+			/* 轮播图样式 */
+			.swiper-container {
+				width: 100%;
+				height: 30%;
+				vertical-align: bottom;
+			}
+			/* 导航 */
+			.nav{
+				border-bottom: 1px solid #ddd;
+				background-color: white;
+			}
+			.nav p{
+				display: inline-block;
+				width: 27%;
+				padding-left: 1em;
+				color: inherit;
+			}
+			.nav .active{
+				border-bottom: 1px solid #FF6990;
+				color: #FF6990;
+				
+			} 
+			.nav-sticky{
+				z-index: 9999;/*需设置zIndex,避免在悬停时,可能会被列表数据遮住*/
+				position: -webkit-sticky;
+				position: sticky;
+				top: 0;/*相对mescroll的div悬停的位置*/
+			}
+			.nav-fixed{
+				z-index: 9999;
+				position: fixed;
+				top: 44px;
+				left: 0;
+				width: 100%;
+			}
+			.mescroll{
+				position: fixed;
+				top:5px;
+				bottom: 0;
+				height: auto;
+			}
+			/* 文章列表样式 */
+			.weui-panel{
+				/* position: relative; */
+				height: auto;
+				text-align: start;
+				border-bottom: 1px solid #eee;
+			}
+			 .weui-media-box{
+				 padding: 10px;
+			 }
+			.weui-media-box_appmsg{
+				height: 5em;
+			}
+		</style>
+	</head>
+	<body ontouchstart>
+	<!-- 	轮播图+导航 -->
+	<!-- 滑动区域 每个页面的格式一样,导航也可滑动-->
+	<div class="mescroll art" id="mescroll">		
+		<!-- 轮播图 -->
+		<div class="swiper-container top">
+			<div class="swiper-wrapper">
+				<img  class="swiper-slide" src="http://xiaoyuanfeixia.com/pic/4.jpg">
+				<img  class="swiper-slide" src="http://xiaoyuanfeixia.com/pic/5.jpg">
+				<img class="swiper-slide" src="http://xiaoyuanfeixia.com/pic/6.jpg">
+			</div>
+			<!-- 分页器 -->
+			<div class="swiper-pagination"></div>
+		</div>
+
+		<div id="navWarp">
+			<div id="nav" class="nav">
+				<p class="active" i="0">时光散文</p>
+				<p i="1">飞驰人生</p>
+				<p i="2">娱乐八卦</p>
+			<!-- 	<p i="3">好物推荐</p> -->
+			</div>
+		</div>
+		
+		<!-- 如果需要每个页面的格式不一样，需要用这里	 -->
+			<!-- 电脑装备 -->
+			<div class="mescroll0" id="mescroll0">
+				<div id="dataList0" class="data-list0"></div>	
+			</div>													
+			<!-- 手机技巧 -->
+			<div class="mescroll1" id="mescroll1">
+				<div id="dataList1" class="data-list1"></div>
+			</div>										
+			<!-- 一抹时光 -->
+			<div class="mescroll2" id="mescroll2">
+				<div id="dataList2" class="data-list2"></div>	
+			</div>						
+			<!-- 好物推荐 -->
+			<!-- <div id="mescroll3" class="mescroll3">
+				<div id="dataList3" class="data-list3"></div>
+			</div> -->						
+	</div>
+			 
+	<script src="http://xiaoyuanfeixia.com/html_lib/js/swiper.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="https://libs.baidu.com/jquery/2.0.0/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="http://xiaoyuanfeixia.com/html_lib/js/mescroll.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		$(function(){
+		//创建MeScroll对象
+		var curNavIndex=0;//一抹时光0; 陌上花开1;岁月清浅2；
+		var mescrollArr=new Array(3);//3个菜单所对应的3个mescroll对象
+		
+		mescrollArr[0]=initMescroll("mescroll0", "dataList0");
+		// 初始化菜单
+		$(".nav p").click(function(){
+			//取出当前页的i的值
+			var i = Number($(this).attr("i"));
+			//更改列表条件
+			$(".nav .active").removeClass("active");
+			$(this).addClass("active");
+			if(curNavIndex != i){
+				//隐藏当前列表和回到顶部按钮
+				$("#mescroll"+curNavIndex).hide();
+				mescrollArr[curNavIndex].hideTopBtn();
+				//显示对应的列表
+				$("#mescroll"+i).show();
+				if(mescrollArr[i] == null){
+					mescrollArr[i] = initMescroll("mescroll"+i,"dataList"+i);
+				}else{
+					//检查是否需要显示回到顶部按钮
+					var curMescroll=mescrollArr[i];
+					var curScrollTop=curMescroll.getScrollTop();
+					if(curScrollTop>=curMescroll.optUp.toTop.offset){
+						curMescroll.showTopBtn();
+					}else{
+						curMescroll.hideTopBtn();
+					}
+				}
+				curNavIndex = i;
+			}
+		})
+		
+		function initMescroll(mescrollId, clearEmptyId) {
+			var htmlContent = '<p class="downwarp-tip">↓ 下拉刷新 ↓</p>';
+					htmlContent += '<img class="downwarp-progress" src="http://xiaoyuanfeixia.com/images/mescroll-progress.png"/>';
+					htmlContent += '<img class="downwarp-slogan" src="http://xiaoyuanfeixia.com/images/mescroll-slogan.png"/>';			
+			//上拉加载中的布局
+			var htmlLoading = '<img class="upwarp-progress mescroll-rotate" src="http://xiaoyuanfeixia.com/images/mescroll-progress.png"/><img class="upwarp-slogan" src="../res/img/mescroll-slogan.png"/>';
+			//无数据的布局
+			var htmlNodata = '<img class="upwarp-nodata" src="http://xiaoyuanfeixia.com/images/mescroll-nodata.png"/>';
+			
+			var mescroll = new MeScroll(mescrollId,{
+				down: {
+					htmlContent: htmlContent, //布局内容
+					inOffset: function(mescroll) {
+					//进入指定距离范围内那一刻的回调
+					mescroll.downTipDom.innerHTML = "↓ 下拉刷新 ↓";
+					mescroll.downProgressDom.classList.remove("mescroll-rotate");
+					},
+				outOffset: function(mescroll) {
+					//下拉超过指定距离那一刻的回调
+					mescroll.downTipDom.innerHTML = "↑ 释放更新 ↑";
+					},
+				},
+				//上拉加载
+				up: {
+					page:{
+						num:0,
+						size:5
+						},
+					loadFull: {
+						use: false, 
+						delay: 200 //延时执行的毫秒数; 
+						},
+					noMoreSize: 5,//列表的总数量要大于5才显示无更多数据;提高用户体验
+					callback: getListData, 
+					isBounce: true, 
+					clearEmptyId: "dataList", 
+					toTop:{ //配置回到顶部按钮
+						src : "http://xiaoyuanfeixia.com/html_lib/res/img/mescroll-totop.png", 
+						offset : 300//设置滚动到500px时便显示回到顶部按钮
+						},
+					empty: {//列表无任何数据时,显示的空提示布局; 需配置warpId才显示						
+						icon: "http://xiaoyuanfeixia.com/html_lib/res/img/mescroll-empty.png", //图标,默认null,支持网络图
+						tip: "时光静好，有你真好~" ,//提示
+						},
+					clearEmptyId: clearEmptyId, //相当于同时设置了clearId和empty.warpId; 简化写法;默认null;
+					htmlContent: htmlContent,
+					htmlNodata: htmlNodata, //无数据的布局
+					lazyLoad: {
+						use: true, // 是否开启懒加载,默认false
+						//attr:'https://flyingman.sc2yun.com/lib/res/img/loading8.gif',
+						delay:500,
+						offset:200
+					}	
+			}
+		});	
+			var navWarp=document.getElementById("navWarp");
+			if(mescroll.os.ios){
+					//ios的悬停效果,通过给navWarp添加nav-sticky样式来实现
+					navWarp.classList.add("nav-sticky");
+				}else{
+					//android和pc端悬停效果,通过监听mescroll的scroll事件,控制navContent是否为fixed定位来实现
+					navWarp.style.height=navWarp.offsetHeight+"px";//固定高度占位,避免悬浮时列表抖动
+					var navContent=document.getElementById("navContent");
+					mescroll.optUp.onScroll=function(mescroll, y, isUp){
+						console.log("up --> onScroll 列表当前滚动的距离 y = " + y + ", 是否向上滑动 isUp = " + isUp);
+						if(y>=navWarp.offsetTop){
+							navContent.classList.add("nav-fixed");
+						}else{
+							navContent.classList.remove("nav-fixed");
+						}
+					}
+				}
+			return mescroll;
+	}			
+			//获取数据
+			function getListData(page){
+				var dataIndex=curNavIndex;//记录下标,防止快速切换时,已经变化
+				var num = page.num-1;
+				//console.log(page.num);
+				jQuery.support.cors = true; 
+				$.ajax({
+					type : 'get',
+					url : 'http://xiaoyuanfeixia.com/public/app/page/art/article_prose_decode.php?dataIndex='+dataIndex+'&page='+num+'&size='+page.size,				
+					dateType : 'json',
+					success : function(curPageDateFormat){
+						//console.log(curPageDateFormat);
+						var curPageDate = JSON.parse(curPageDateFormat);
+						console.log("dataIndex = "+dataIndex+",page = "+num+",size = "+page.size+",length = "+curPageDate.length);
+						mescrollArr[dataIndex].endSuccess(curPageDate.length);
+						//设置列表数据
+						setListData(curPageDate,dataIndex);					
+					},
+					error : function(jqXHR,textStatus,errorThrown){
+						//联网失败回调,隐藏下拉刷新和上拉加载状态
+						mescrollArr[dataIndex].endErr();
+						console.log(jqXHR);
+						console.log(textStatus);
+						console.log(errorThrown);
+					}
+				});
+			}
+			/*设置列表数据,默认四个列表数据格式一样*/
+			function setListData(curPageData,dataIndex){
+				var listDom=document.getElementById("dataList"+dataIndex);
+				for (var i = 0; i < curPageData.length; i++) {						
+					var pd=curPageData[i];
+					var str='<div class="weui-panel weui-panel_access">';
+					str+='<div class="weui-panel__bd">';
+					str+='<a href="javascript:;" onclick="test(this.id)" class="weui-media-box weui-media-box_appmsg" id="'+dataIndex+pd.art_id+'">';
+					str+='<div class="weui-media-box__hd">';
+					str+='<img class="weui-media-box__thumb" id="imageUrl" src="'+pd.imageUrl+'">';
+					str+='</div>';
+					str+='<div class="weui-media-box__bd">';
+					str+='<h4 class="weui-media-box__title">'+pd.dest+'</h4>';
+					str+='<p class="weui-media-box__desc">'+pd.ldest+'</p>';
+					str+='</div>';					
+					str+='</a>';
+					str+='</div>';
+					str+='</div>';
+										
+					var liDom=document.createElement("abc");
+					liDom.innerHTML=str;
+					listDom.appendChild(liDom);		 			
+				}
+			}
+		});	
+		
+		//初始化 轮播图
+		var mySwiper = new Swiper ('.swiper-container', {
+    loop: true, // 循环模式选项   
+    // 如果需要分页器
+    pagination: {
+      el: '.swiper-pagination',
+			clickable: true,//点击切换页面
+    },
+		//每个图之间的空隙
+		spaceBetween: 30,
+		centeredSlides: true,
+		//自动播放
+		autoplay: {
+			delay: 2500,
+			disableOnInteraction: false,
+		},  
+  }); 
+	//点击链接跳转页面
+	function test(obj){	
+		//alert(obj);
+		var dataIndex = obj.substr(0,1);
+		var id = obj.substr(1);
+		//alert(dataIndex+"--"+id);
+		var imageUrl = $('#imageUrl').html();
+
+		window.location.href = "http://xiaoyuanfeixia.com/public/html/app/art/artIndex.php?artDataType=2&id="+id+"&dataIndex="+dataIndex+"&flag=1";
+	}
+</script>
+	</body>
+</html>

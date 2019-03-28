@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=0">
+    <title>校园飞侠--发布任务</title>
+		<link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css"/>
+   <link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css"/>
+	 
+	 <style type="text/css">
+			.task-head{
+				text-align: center;
+				color: #009F95;
+				background: #DAEACE;
+				border: 0.1rem solid darkkhaki;
+			}
+			.weui-cells_form{
+				background-color: #FBFBFB;
+			}
+			.weui-cell{
+				background-color: #FFFFFF;
+				margin-bottom: 10px;
+			}
+			#checkCode{ 
+						font-family:Arial;  
+						font-style:italic;  
+						font-weight:bold;
+						text-align: center;
+						font-size: 1.1rem;
+						color:blue;  
+						border: 0;
+						margin-right: 2em;
+						width: 100%;
+			}
+			#checkCode:focus{
+				outline: none;
+			}
+	 </style>
+  </head>
+
+  <body ontouchstart>
+
+    <form">
+
+    <div class="weui-cells weui-cells_form">
+			<!-- 任务类型 -->
+      <div class="weui-cell">
+        <div class="weui-cell__hd"><label for="name" class="weui-label" >任务类型</label></div>
+        <div class="weui-cell__bd">
+          <input class="weui-input" id="name" type="text" placeholder="点击选择" name="type">
+        </div>
+      </div>
+			<!-- 酬金 -->
+			<div class="weui-cells__title">酬金要1元起哦</div>
+			<div class="weui-cell">
+				<div class="weui-cell__hd"><label class="weui-label">酬金(元)</label></div>
+				<div class="weui-cell__bd">
+					<input class="weui-input" type="text" placeholder="点这里输入酬金" id="money" name="money">
+				</div>			
+			</div>
+			<!-- 截止时间 -->
+      <div class="weui-cell">
+        <div class="weui-cell__hd"><label for="date" class="weui-label">截止时间</label></div>
+        <div class="weui-cell__bd">
+          <input class="weui-input" id="datetime-picker" type="text" value="" name="time_limit">
+        </div>
+      </div>
+			<!-- 发布范围 -->
+			<!-- on为全国，off为本校 -->
+			<input hidden="hidden" name="btn1" id="btn" value="off" type="radio" checked="checked"/>
+			<div class="weui-cell weui-cell_switch">
+				<div class="weui-cell__bd">全国可抢</div>
+				<div class="weui-cell__ft">
+				<input class="weui-switch" type="checkbox" id = "ground">
+			</div>
+			</div>
+			<!-- 验证码 -->
+			<div class="weui-cell weui-cell_vcode">
+				<div class="weui-cell__hd"><label class="weui-label">验证码</label></div>
+				<div class="weui-cell__bd">
+					<input class="weui-input" id="inputCode" placeholder="请输入验证码">
+				</div>
+				<div class="weui-cell__ft">
+					<span  class="weui-vcode-img weui-btn weui-btn_default" id="checkCode"></span>
+				</div>
+			</div>
+			
+			<!-- 任务简述框 -->
+			<div class="weui-cells__title">任务简述</div>
+			<div class="weui-cells">
+				<div class="weui-cell">
+					<div class="weui-cell__bd">
+					<input class="weui-input" type="text" placeholder="" id="dest" name="dest">
+					</div>
+				</div>
+			</div>
+			<div class="weui-cells__tips">
+				<i class="weui-icon-cancel"></i>
+				请勿输入验证码.取件码等敏感信息。请描述：圆通快递，万达广场等大概信息</div><hr >
+			<!-- 详细任务描述 -->
+			<div class="weui-cells__title">详细任务描述</div>
+			<div class="weui-cell">
+				<div class="weui-cell__bd">
+				<textarea class="weui-textarea" placeholder="仅对接单人可见" rows="4" id="ldest" name="ldest" onkeyup="wordStatic(this);" maxlength="300"></textarea>
+				<div class="weui-textarea-counter"><span id="cnt">0</span>/300</div>
+				</div>
+			</div>
+			<!-- 提交按钮 -->
+			<div class="weui-btn-area">
+				<input class="weui-btn weui-btn_primary" id="showTooltips" type="submit" value="立即发布">
+			</div>
+    </div>
+   </form>
+		<script src="https://libs.baidu.com/jquery/2.0.0/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="http://xiaoyuanfeixia.com/html_lib/js/task.js" type="text/javascript" charset="utf-8"></script>
+  </body>
+	<script type="text/javascript">
+		var code;//全局变量,验证码
+		window.onload = function (){
+			createCode();
+		}
+		function wordStatic(input) {
+			// 获取要显示已经输入字数文本框对象
+		var content = document.getElementById('cnt');
+		if (content && input) {	
+			var value = input.value;					
+			alue = value.replace(/\n|\r/gi,"");				
+			content .innerText = value.length;
+			}
+	}		
+		//等待提示
+		function loadingTips(){
+		layer.open({
+			type: 2,
+			content: '努力~努力~(⊙o⊙)…'
+		});
+		}
+		//未绑定信息提示
+		function infoTips(){
+			layer.open({
+			content: '为保证任务及时领取，请先到个人中心绑定学校和手机~',
+			skin: 'msg',
+			time: 3 //2秒后自动关闭
+			});
+		}
+	
+		function successTips(){
+			//询问框
+			layer.open({
+				content: '恭喜~发布成功！',
+				btn: ['再来一单', '去抢单池'],
+				no : function(goPoll){
+					location.reload();
+					$(location).attr('href', 'http://xiaoyuanfeixia.com/privite/html/app/pool.php');				
+				},
+				yes: function(index){
+					location.reload();
+					layer.close(index);
+				}
+			});
+		}
+		function errorTips(){
+			layer.open({
+			content: '发布失败了，稍后再试下吧~',
+			skin: 'msg',
+			time: 2 //2秒后自动关闭
+			});
+		}
+		//生成验证码
+		function createCode(){
+			//首先默认code为空字符串
+			code = '';
+			//设置长度，这里看需求，我这里设置了4
+			var codeLength = 4;
+			var codeV = document.getElementById('checkCode');
+			//设置随机字符
+			var random = new Array(0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r', 's','t','u','v','w','x','y','z');
+			//循环codeLength 我设置的4就是循环4次
+			for(var i = 0; i < codeLength; i++){
+				//设置随机数范围,这设置为0 ~ 36
+				var index = Math.floor(Math.random()*36);
+				//字符串拼接 将每次随机的字符 进行拼接
+				code += random[index]; 
+			}
+			//将拼接好的字符串赋值给展示的Value
+			$('#checkCode').html(code);
+		}
+		//验证码校对
+		function validate(){
+			var oValue = $('#inputCode').val();
+			console.log("oValue:"+oValue);
+			if(oValue ==0){
+				return 1;
+			}else if(oValue != code){
+				return 1;
+			}else{
+				return 2;
+			}
+		}
+		$('#checkCode').click(function(){
+			createCode();
+		});
+	//表单验证	
+$("#showTooltips").click(function(){
+	var typea = $('#name').val();
+	var times = $('#datetime-picker').val();
+	var moneya = $('#money').val();
+	var dest = $('#dest').val();
+	var desta = $.trim(dest);
+	var grounda = $('#btn').val();
+	var ldest = $('#ldest').val();
+	var time = Date.parse(new Date())/1000;//当前时间
+	if(times){
+		var date  = times.replace(/年/,'/').replace(/月/,'/').replace(/日/,'');
+		var times = new Date(date).getTime()/1000;			
+	}
+	console.log("任务类型："+$.trim(typea)+",截止时间："+times+",酬金："+moneya+",任务描述："+desta+",详细描述："+ldest);
+		if(typea == ""){
+			$.toptip("任务类型不能为空",'warning');
+			return false;
+		}else if(moneya == "" || moneya %1 !=0 || moneya < 1 || moneya > 999){
+			$.toptip("酬金需为大于1元小于1000元的整数",'warning');
+			return false;
+		}else if(times == ""){
+			$.toptip("截止时间不能为空",'warning');
+			return false;
+		}else if(times - time < 0){
+			$.toptip("截止时间不能早于当前时间",'warning');
+			return false;
+		}else if(times - time < 840){
+			$.toptip("截止时间至少比当前晚15分钟哦",'warning');
+			return false;
+		}else if(desta == ""){
+			$.toptip("任务简述不能为空",'warning');
+			return false;
+		}
+		console.log(validate()+"code:"+code);
+		if(validate() == 2){
+			createCode();//刷新验证码,防止重复提交
+			//ajax post提交表单数据
+			$.ajax({
+				//console.log("执行到ajax");
+				type : 'post',
+				url : 'http://xiaoyuanfeixia.com/privite/app/page/form.php',
+				dateType : 'json',
+				data : {
+					type : typea,
+					money : moneya,
+					time_limit : times,
+					ground : grounda,
+					dest : desta,
+					ldest : ldest
+					},
+				async:true,
+				beforeSend :function loading(){
+					loadingTips();
+				},
+				success : function(dateRtn){
+					layer.closeAll();
+					var rtn = JSON.parse(dateRtn);
+					if(rtn == '1'){
+						successTips();
+					}else if(rtn == '2'){
+						infoTips();
+					}else{
+						errorTips();
+					}
+				},
+				error : function(){
+                    layer.closeAll();
+					errorTips();
+				}
+			})
+		}else{
+			$.toptip('验证码不正确，请重新输入','error');
+			createCode();
+		}
+	});
+
+
+	</script>
+  <script src="http://xiaoyuanfeixia.com/html_lib/js/layer/mobile/layer.js" type="text/javascript" charset="utf-8"></script>
+</html>

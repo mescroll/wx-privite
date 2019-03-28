@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>获取验证码</title>
+		<link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css"/>
+		<link rel="stylesheet" type="text/css" href="https://flyingman.sc2yun.com/lib/js/layer/mobile/need/layer.css"/>
+		<link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css"/>
+		<style type="text/css">
+			body{
+				background: #F5F6F5;
+			}
+			.box{
+				margin-left: 2em;
+				margin-right: 2em;
+				margin-top: 10em;
+			}
+			.weui-cell{
+				height: 3em;
+			}
+			.weui-cell__hd{
+				height: 3em;
+			}
+			.weui-cell__hd img{
+				width:20px;
+				margin-right:5px;
+				display:block;
+				margin-top: 0.9em;
+			}
+			.code{
+				height: 2em;
+			}
+			.btn{
+				margin-top: 1.5em;
+				margin-left: 5px;
+				margin-right: 5px;
+			}
+			.tem{
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box">
+		<div class="weui-cells">
+			 <div class="weui-cell weui-cell_vcode">
+				<div class="weui-cell__hd">
+				  <img class="weui-label" src="https://flyingman.sc2yun.com/images/tel.png" >
+				</div>
+				<div class="weui-cell__bd">
+				  <input class="weui-input" type="tel" id="tel" placeholder="请输入手机号">
+				</div>
+				<div class="weui-cell__ft">
+				  <span class="weui-vcode-btn" id="validate_span" onclick="sendsms(this);">获取验证码</span>
+				</div>
+			 </div>
+		
+			<div class="weui-cell code">
+				<div class="weui-cell__hd">
+					<img src="https://flyingman.sc2yun.com/images/code.png" >
+				</div>
+			<div class="weui-cell__bd">
+			  <input class="weui-input" id="code" placeholder="请输入验证码">
+			</div>
+			</div>
+			<input type="text" id="tem" class="tem"/>
+		</div>
+		<a class="weui-btn weui-btn_primary btn" id="btn">立即绑定</a>
+		<div class="weui-footer weui-footer_fixed-bottom">
+			<p class="weui-footer__text">Copyright © 校园飞侠 2018 V1.2</p>
+		</div>
+	</div>
+	</body>
+	<script src="https://libs.baidu.com/jquery/2.0.0/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src=" https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">				
+		//提交绑定
+		$("#btn").click(function () {
+			//先检测输入是否合法
+			var tel = $("#tel").val();
+			var code = $('#code').val();//用户输入的
+			if(tel == ""){
+				$.toptip('请输入手机号','warning');
+			}else if (!tel.match(/^1\d{10}$/)) {
+				$.toptip("请输入正确的手机号码",'warning');
+			}else if (code == "" || code == null) {
+				$.toptip("请输入验证码",'warning');
+			}else{
+				var tem = $('#tem').val();//系统发送的
+				if(tem != code){
+					$.toptip('验证码错误','error');
+				}else{
+					//保存到数据库
+					$.ajax({
+						type:'post',
+						url:'https://flyingman.sc2yun.com/php_unit_public/app/page/user_page/telPage.php',
+						dataType:'json',
+						data:{
+							telNum:tel
+						},
+						success:function(e){
+							var rtn = JSON.parse(e);
+							if(rtn == '1'){
+								successCodeTips();	
+								setTimeout(reloadUrl,2000);
+								
+							}else{
+								errorTips();
+							}
+						},
+						error:function(){
+							$.toptip("网络出问题了~",'error');
+						}
+					})
+				}
+			}
+		});
+		function reloadUrl(){
+			location.href = 'https://flyingman.sc2yun.com/php_unit_public/html/app/userInfo.html';
+		}
+		//发送验证码函数
+		function sendsms(e){
+			var num = $('#tel').val();
+			if(num == ""){
+				$.toptip("请输入手机号",'warning');
+			}else if (!num.match(/^1\d{10}$/)) {
+				alert("请输入正确的手机号码");
+			}else{
+				//生成四位数的验证码
+				var sCode = Math.random()*980000+100000;
+				sCode = parseInt(sCode,10);
+				
+				$('#tem').val(sCode);//将验证码赋给隐藏元素的value
+				console.log("tel:"+num);
+				console.log("验证码:"+sCode);
+				
+				$.ajax({
+					type:'post',
+					url:'https://flyingman.sc2yun.com/api/message/sendCode/SmsDemo.php',
+					dataType:'json',
+					data:{
+						code:sCode,
+						telNum:num
+					},
+					success:function(b){
+						console.log(b);
+						var rtnDate = JSON.parse(b);
+						if(rtnDate == '1'){
+							$.alert("验证码正发往您的手机,如果没有收到，请检查一下是否被安全软件拦截", "发送成功");
+							countdown(e);
+						}else{
+							$.toptip('验证码发送失败','error');
+						}
+					},
+					error : function(jqXHR,textStatus,errorThrown){
+						console.log(jqXHR);
+						console.log(textStatus);
+						console.log(errorThrown);
+						$.toptip('网络好像有点问题~','error');
+					}
+				})
+			
+			}
+		}
+		//倒计时函数
+		var time = 90;
+		function countdown(e){
+			if (time == 0) {				
+				e.setAttribute("onclick","sendsms(this)");
+				$("#validate_span").html("获取验证码");
+				time = 90;
+			}else{
+				e.removeAttribute("onclick");
+				$("#validate_span").html("重新获取(" + time + ")");
+				time--;
+				setTimeout(function() {
+					countdown(e)
+				},1000)
+			}
+		}
+		//错误提示
+		function errorTips(){
+			layer.open({
+			content: '保存失败，请您稍后再试',
+			skin: 'msg',
+			time: 3 //2秒后自动关闭
+			});
+		}
+		//等待提示
+		function loadingTips(index){
+		layer.open({
+			type: 2,
+			content: '小飞侠正在奔跑~~'
+		});
+		}
+		function successCodeTips(){
+			layer.open({
+			content: '绑定成功~',
+			skin: 'msg',
+			time: 3 //2秒后自动关闭
+			});
+		}	
+		
+	</script>
+	<script src="https://flyingman.sc2yun.com/lib/js/layer/mobile/layer.js" type="text/javascript" charset="utf-8"></script>
+</html>
